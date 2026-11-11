@@ -34,14 +34,14 @@ WindowVM 是为 Apple 芯片 Mac 打造的开源 Windows 11 ARM 虚拟机应用�
 
 ### 下载与安装
 
-1. 使用 **Apple 芯片 Mac**。当前 **v0.1.0 预编译安装包要求 macOS 27 或以上**，因为随附的 Homebrew QEMU 11.1.3 二进制以 macOS 27 为最低版本。Swift 应用源码目标为 macOS 14+，较旧系统需自行构建兼容的 QEMU，未验证。
+1. 使用 **Apple 芯片 Mac**。当前 **v0.1.1 预编译安装包要求 macOS 27 或以上**，因为随附的 Homebrew QEMU 11.1.3 二进制以 macOS 27 为最低版本。Swift 应用源码目标为 macOS 14+，较旧系统需自行构建兼容的 QEMU，未验证。
 2. 安装 [Homebrew](https://brew.sh)，然后在终端运行：
 
    ```sh
    /opt/homebrew/bin/brew install qemu swtpm
    ```
 
-3. 从 [Releases](https://github.com/Drok1015/WindowVM/releases/latest) 下载 `WindowVM-0.1.0-macos-arm64.dmg`，打开后将 `WindowVM.app` 拖入“应用程序”。**当前安装包仍需要 Homebrew 的运行库和工具，不是独立运行包。**
+3. 从 [Releases](https://github.com/Drok1015/WindowVM/releases/latest) 下载 `WindowVM-0.1.1-macos-arm64.dmg`，打开后将 `WindowVM.app` 拖入“应用程序”。**当前安装包仍需要 Homebrew 的运行库和工具，不是独立运行包。**
 4. 应用采用 ad-hoc 签名，尚未获得 Apple 开发者签名和公证。若 macOS 拦截，在确认下载来源后，按照“系统设置 → 隐私与安全性”的提示允许打开。
 5. 启动应用，通过 [微软官方下载 Windows 11 ARM64 ISO](https://www.microsoft.com/zh-cn/software-download/windows11arm64)，选择镜像并创建虚拟机。安装联网需要 VirtIO ISO 中的 ARM64 NetKVM 驱动，应用内有下载入口。
 6. Windows 安装完成后，在 `WINDOWVM_TOOLS` 光盘运行 `Install.cmd` 启用文字剪贴板，再运行 `InstallDisplay.cmd` 安装显示驱动；后者需要 Windows 管理员确认。安装完成并正常关机后，取消挂载安装镜像。
@@ -96,14 +96,14 @@ This is an early preview for users comfortable installing Windows and its runtim
 
 ### Download and install
 
-1. Use an **Apple silicon Mac**. The **v0.1.0 prebuilt download requires macOS 27 or later** because its bundled Homebrew QEMU 11.1.3 binary targets macOS 27. The Swift source targets macOS 14+, but older systems require a separately built compatible QEMU and have not been tested.
+1. Use an **Apple silicon Mac**. The **v0.1.1 prebuilt download requires macOS 27 or later** because its bundled Homebrew QEMU 11.1.3 binary targets macOS 27. The Swift source targets macOS 14+, but older systems require a separately built compatible QEMU and have not been tested.
 2. Install [Homebrew](https://brew.sh), then run:
 
    ```sh
    /opt/homebrew/bin/brew install qemu swtpm
    ```
 
-3. Download `WindowVM-0.1.0-macos-arm64.dmg` from [Releases](https://github.com/Drok1015/WindowVM/releases/latest). Open it and drag `WindowVM.app` into Applications. **Homebrew libraries and tools are still required; this is not a standalone bundle.**
+3. Download `WindowVM-0.1.1-macos-arm64.dmg` from [Releases](https://github.com/Drok1015/WindowVM/releases/latest). Open it and drag `WindowVM.app` into Applications. **Homebrew libraries and tools are still required; this is not a standalone bundle.**
 4. The app is ad-hoc signed and is not Apple Developer signed or notarized. If macOS blocks it, verify the download source and follow the approval prompt under System Settings → Privacy & Security.
 5. Open WindowVM, download an official [Windows 11 ARM64 ISO](https://www.microsoft.com/en-us/software-download/windows11arm64), select it, and create the VM. Networking during installation needs the ARM64 NetKVM driver from the VirtIO ISO linked in the app.
 6. Inside Windows, run `Install.cmd` from the `WINDOWVM_TOOLS` CD for clipboard integration, then `InstallDisplay.cmd` for the display driver. The display installer requires Windows administrator approval. After installation and a normal shutdown, unmount the Windows installer ISO.

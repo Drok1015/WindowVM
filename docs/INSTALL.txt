@@ -1,4 +1,4 @@
-WindowVM 0.1.0 — 轻办公 Windows 虚拟机 / Windows for everyday work
+WindowVM 0.1.1 — 轻办公 Windows 虚拟机 / Windows for everyday work
 
 中文
 1. 当前预编译包仅支持 Apple 芯片 Mac + macOS 27 或以上。
@@ -12,7 +12,9 @@ WindowVM 0.1.0 — 轻办公 Windows 虚拟机 / Windows for everyday work
    在应用中选择镜像，创建并安装 Windows；应用内提供 VirtIO 网卡驱动下载入口。
 5. Windows 安装完成后，在 WINDOWVM_TOOLS 光盘运行 Install.cmd，
    再运行 InstallDisplay.cmd（需要 Windows 管理员确认）。
-6. 暂停时不要修改虚拟机文件、移动应用或升级 QEMU/swtpm。
+6. 关闭管理窗口只隐藏界面；关闭 Windows 窗口会显示保存大小和耗时，
+   保存完成后自动关闭。请等待完成，较大状态可能需要数分钟。
+7. 暂停时不要修改虚拟机文件、移动应用或升级 QEMU/swtpm。
    先继续并正常关机，再备份整个虚拟机目录或升级。
 
 English
@@ -28,7 +30,9 @@ English
    VirtIO network drivers needed during setup.
 5. Inside Windows, run Install.cmd from WINDOWVM_TOOLS, then InstallDisplay.cmd
    (Windows administrator approval required) for clipboard/display integration.
-6. Resume and shut down normally before moving the app, modifying VM files,
+6. Closing the manager hides its UI. Closing the Windows window shows save
+   size and elapsed time, then closes automatically. Large states can take minutes.
+7. Resume and shut down normally before moving the app, modifying VM files,
    or upgrading QEMU/swtpm. Back up the entire VM directory after shutdown.
 
 应用界面目前为中文。/ The app UI is currently Chinese.

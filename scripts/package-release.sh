@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 cd "$(dirname "$0")/.."
-version=0.1.0
+version=0.1.1
 qemu_version=11.1.3
 qemu_sha=5a8289c7940dc77d3873c81a6c29ba3afe1446fc9d36e77fa1658cdbecb84b22
 if [[ $(/opt/homebrew/bin/qemu-system-aarch64 --version | head -1) != "QEMU emulator version $qemu_version"* ]]; then
