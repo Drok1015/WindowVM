@@ -1,0 +1,7 @@
+.build/
+build/
+.DS_Store
+*.qcow2
+*.iso
+Firmware/*.fd
+docs/续做进度.md

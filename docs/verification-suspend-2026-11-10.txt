@@ -1,0 +1,61 @@
+WindowVM suspend/resume verification — 2026-11-10
+
+Implemented:
+- Engine window close and app Quit request suspension through a private
+  PID-scoped local request. The original QEMU UI shutdown path is intercepted.
+- Manager offers Save and Pause / Continue Windows. Quitting a running manager
+  waits for successful suspension before exiting.
+- QMP stops CPUs, saves RAM/device/TPM state through a file migration channel,
+  waits for completed, synchronizes the file, records pending intent, then quits.
+- Once QEMU and swtpm exit, the manager seals the manifest against disk, NVRAM,
+  TPM, media and state file stamps plus engine/swtpm/firmware hashes.
+- Recovery validates the checkpoint, retains the original tools ISO, loads with
+  -incoming defer -S, and explicitly resumes after migration completes.
+- A consumed journal prevents stale memory replay after an ambiguous crash.
+  Partial saves, incompatible files or interrupted transitions block cold boot.
+- Opening the Engine directly redirects to the manager. Opening the manager
+  with a valid paused state automatically resumes it.
+
+Live Windows verification:
+1. User logged into Windows. Created an unsaved Notepad document containing
+   the visible marker "windowvmuts-nav".
+2. Selected Engine > Quit QEMU. The manager showed saving, then Paused.
+   Both QEMU and swtpm exited. The completed state file was 4,982,783,922 bytes.
+3. Quit the paused manager and reopened through the Engine entry point.
+   The manager launched automatically, loaded the checkpoint, and resumed the
+   existing Windows desktop without another Windows login.
+4. The Notepad marker and cursor position remained visible. The guest clipboard
+   agent reconnected and Retina display adaptation reported 2560 x 1600 / 800ms.
+5. Clicked the actual native Engine close button. It triggered saving rather
+   than shutdown. Once Paused appeared, clicked Continue Windows.
+6. After this second restore, the same unsaved document remained editable.
+   Mac TextEdit -> Windows Notepad Chinese clipboard paste succeeded.
+   Windows Notepad -> Mac TextEdit copy returned the combined marker + Chinese
+   text, proving both directions after recovery.
+7. Edge opened a new Google HTTPS page after recovery. QEMU had an established
+   TCP connection to the unchanged Mac loopback proxy on port 7898.
+8. QMP query-status: running=true. query-migrate: completed. All suspend and
+   consumed-journal files were removed after successful recovery.
+
+Checks:
+- swift test: 9 tests passed (5 WindowVM + 4 VMCore).
+- New failure-injection monitor test: migration error resumes the guest,
+  deletes partial state, does not commit and never sends quit. Unsolicited QMP
+  events are handled between responses.
+- Manifest tests reject changed disk, NVRAM, tools/external media, memory file,
+  TPM state, engine/firmware, configuration and launch arguments; modes are 0600.
+- Native AppKit tests pass, including close/quit interception and duplicate
+  suppression, plus the existing Retina and 800ms resizing coverage.
+- scripts/smoke-suspend.py passed on a separate temporary HVF/TPM machine:
+  save completed, QEMU exited, new QEMU/swtpm restored the file, then ran again.
+- Release build and deep/strict code signature verification passed.
+- Packaged manager matches the current release binary by SHA-256 after
+  normalizing code signatures on temporary copies (signing changes metadata).
+
+Final state: production Windows VM remains running. No firmware, TPM identity,
+firewall rule or host proxy listener was reset or changed. No commit/push.
+
+Limits: one pending checkpoint, not a history of rollback snapshots. Do not
+modify VM files or upgrade QEMU/swtpm while paused; continue and shut down first.
+Wait for the Engine window to disappear while saving; force termination cannot
+provide the same guarantee. Network connections may require refresh after resume.

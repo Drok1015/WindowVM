@@ -1,0 +1,4 @@
+# Preserve upstream signed driver bytes, including INF line endings.
+Guest/DisplayDriver/* -text
+# Preserve upstream copyright text as received.
+Firmware/COPYRIGHT whitespace=-blank-at-eol

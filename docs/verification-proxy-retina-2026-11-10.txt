@@ -1,0 +1,35 @@
+WindowVM proxy and Retina verification — 2026-11-10
+
+Implemented:
+- Snapshot the Mac explicit HTTP/HTTPS proxy when starting the VM; translate
+  loopback addresses to the QEMU guest host gateway (10.0.2.2).
+- Guest UseHostProxy.cmd tests HTTPS before applying the current user's native
+  Windows LAN proxy settings. RestoreProxy.cmd restores the saved settings.
+- Render at the display's backing pixel scale, including scale changes when
+  moving between displays. Preserve the existing 800 ms resize throttle.
+
+Live verification:
+- Current Mac proxy: 127.0.0.1:7898; Windows proxy: 10.0.2.2:7898.
+- Windows HTTPS request through that proxy returned HTTP 204.
+- Native Windows proxy application reported success; Edge loaded Google over
+  HTTPS. QEMU established connections to the Mac loopback proxy port.
+- Windows display scaling set to 200%; initial guest resolution 2560 x 1600
+  for a 1280 x 800 point view on the 2x Retina display.
+- After dragging the native window edge, the guest acknowledged 2560 x 1450
+  with success=true and no error. The 800 ms interval remains configured.
+- VM remains running and logged in.
+
+Build and checks:
+- swift test: 6 tests passed.
+- scripts/test-display.sh: passed, including backing-scale changes and
+  leading/trailing 800 ms throttling during event tracking.
+- Release app built and codesign --verify --deep --strict passed.
+- Bundled Guest files match the source files by SHA-256.
+
+Scope:
+- Uses the current user's Windows browser/system proxy. Applications with
+  independent proxy settings or WinHTTP need their own configuration.
+- PAC and SOCKS-only host configurations are not converted.
+- After changing the host proxy port, restart the VM and run UseHostProxy.cmd
+  from the tools disc again. Proxy restore backup is retained in the guest.
+- No firewall rules, host proxy LAN exposure, TPM, or firmware were changed.

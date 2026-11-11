@@ -1,0 +1,13 @@
+WindowVM 验证记录 — 2026-11-10
+
+已通过：
+1. Windows 11 ARM64 安装、登录及正常关机后再启动。
+2. 浏览器网页加载（外部 HTTPS 及 Mac 本机页面）。
+3. Windows → Mac：10.0.2.2:18765 测试页面 HTTP 200。
+4. Mac → Windows：127.0.0.1:18080 → TCP 8080，返回 WINDOWVM_GUEST_NETWORK_OK。
+5. 双向纯文本剪贴板：中文及 emoji 均实际复制粘贴成功；重新登录后配套程序自动连接。
+
+保留的防火墙规则：WindowVM-Host-TCP8080，仅允许来源 10.0.2.2 访问 TCP 8080，禁止边缘遍历。既有 PowerShell 阻止规则保留。
+
+临时 Windows 测试程序运行一次后退出并移入回收站；Mac 临时测试服务已停止。
+当前端口规则只对应 8080，其他 Windows 服务端口需相应配置。

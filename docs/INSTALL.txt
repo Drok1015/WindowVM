@@ -1,0 +1,43 @@
+WindowVM 0.1.0 — 轻办公 Windows 虚拟机 / Windows for everyday work
+
+中文
+1. 当前预编译包仅支持 Apple 芯片 Mac + macOS 27 或以上。
+2. 先安装 Homebrew (https://brew.sh)，在终端运行：
+   /opt/homebrew/bin/brew install qemu swtpm
+   本包需要 /opt/homebrew 中的运行库与工具，不能独立运行。
+3. 将 WindowVM.app 拖入 Applications 文件夹，然后从应用程序启动。
+   本应用使用 ad-hoc 签名，未经 Apple 公证；若被阻止，确认来源后在
+   系统设置 > 隐私与安全性中按照系统提示允许打开。
+4. 从微软官方网站自行下载 Windows 11 ARM64 ISO 并获得许可证。
+   在应用中选择镜像，创建并安装 Windows；应用内提供 VirtIO 网卡驱动下载入口。
+5. Windows 安装完成后，在 WINDOWVM_TOOLS 光盘运行 Install.cmd，
+   再运行 InstallDisplay.cmd（需要 Windows 管理员确认）。
+6. 暂停时不要修改虚拟机文件、移动应用或升级 QEMU/swtpm。
+   先继续并正常关机，再备份整个虚拟机目录或升级。
+
+English
+1. This prebuilt app requires Apple silicon and macOS 27 or later.
+2. Install Homebrew (https://brew.sh), then run in Terminal:
+   /opt/homebrew/bin/brew install qemu swtpm
+   Homebrew libraries and tools in /opt/homebrew remain required.
+3. Drag WindowVM.app into Applications, then launch it from there.
+   The app is ad-hoc signed and not Apple notarized. If blocked, verify the
+   source and follow macOS prompts under System Settings > Privacy & Security.
+4. Download an official Windows 11 ARM64 ISO and obtain a Windows license.
+   Select the ISO in the app to create and install Windows. The app links to
+   VirtIO network drivers needed during setup.
+5. Inside Windows, run Install.cmd from WINDOWVM_TOOLS, then InstallDisplay.cmd
+   (Windows administrator approval required) for clipboard/display integration.
+6. Resume and shut down normally before moving the app, modifying VM files,
+   or upgrading QEMU/swtpm. Back up the entire VM directory after shutdown.
+
+应用界面目前为中文。/ The app UI is currently Chinese.
+不含 Windows 镜像、已安装系统或许可证。/ Windows media, OS and license are not included.
+无 3D 加速、音频或共享文件夹。/ No 3D acceleration, audio or shared folders.
+
+下载、源码与文档 / Downloads, source and documentation:
+https://github.com/Drok1015/WindowVM
+
+第三方许可证 / Third-party licenses: THIRD_PARTY_NOTICES.md and LICENSES/
+QEMU 对应源码 / Corresponding QEMU source: qemu-11.1.3.tar.xz in the same release.
+QEMU 构建配方 / QEMU build recipe: qemu-homebrew.rb (also under docs/ in the repository).

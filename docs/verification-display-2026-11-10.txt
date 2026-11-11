@@ -1,0 +1,24 @@
+WindowVM adaptive display verification - 2026-11-10
+
+Native AppKit test: 800ms leading/trailing throttle in event-tracking run-loop mode; coalesces latest geometry; suppresses duplicate sizes; no framebuffer-to-window feedback; resizable mask/minimum; GPU console activation through controller action.
+Swift tests: 5 passed. Authentication, stale display acknowledgement rejection, clipboard disabled independently from display, dimensions validation, launch configuration and Unicode clipboard.
+Headless smoke: production launch plan with RAMFB + VirtIO GPU, HVF, Secure Boot UEFI, TPM 2.0, NVMe, NAT forwarding, framebuffer and QMP powerdown request passed.
+
+Live Windows 11 ARM64: signed VirtIO DOD 0.1.302 driver staged using pnputil. Guest agent C# compiled and executed in ordinary interactive-user PowerShell. Direct adapter lookup avoids upstream viogpures stopping at the first non-VirtIO adapter. D3DKMTEscape registers the custom mode; SetDisplayConfig selects only VirtIO and applies it. EnumDisplaySettings reads back actual dimensions.
+Confirmed native resize requests and matching successful guest acknowledgements:
+1280 x 800 -> 720 x 882 (macOS left window layout; desktop/taskbar reflow observed).
+720 x 882 -> 824 x 882 (native right-edge drag).
+1280 x 800 -> 1280 x 724 (native bottom-edge drag; no fixed aspect ratio).
+Final request: {"id": "2E2E6308-82CC-4861-89AA-92C5B35E52E1:23", "intervalMs": 800, "width": 1280, "height": 724}
+Final actual mode: {"width": 1280, "height": 724, "id": "2E2E6308-82CC-4861-89AA-92C5B35E52E1:23", "error": null, "success": true}
+
+Continuous-800ms timing is verified by AppKit event-tracking test; live native drags verify actual mode changes. No reboot after the final guest-agent revision was required.
+VM disk, UEFI variables, TPM state and configuration cloned while stopped under VM backups/before-adaptive-display-20261110-102159.
+
+Resume / cold-start verification completed on 2026-11-10:
+- The idle manager process had no accessible window; normal Quit through Activity Monitor and reopen recovered the UI. VM remained stopped throughout recovery.
+- Started Windows with persisted display-configured marker; GPU console selected automatically and the Windows login UI was visible without selecting View/display0 manually.
+- User signed in. Guest agent automatically reconnected; new engine session received a matching successful 1280x800 acknowledgement. Clipboard UI reported connected.
+- A native bottom-right corner drag changed BOTH dimensions to 1200x724. Matching successful acknowledgement: {"width": 1200, "height": 724, "id": "878054BF-3B26-4B04-8135-C11ED9A476EA:2", "error": null, "success": true}
+- Manager UI showed display adapted to 1200x724 / 800ms and bidirectional text clipboard connected.
+- Bundled Guest resources match current source hashes. No source changes or new test failures in the resume pass. VM left running for the user.
