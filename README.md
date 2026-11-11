@@ -1,5 +1,9 @@
 # WindowVM
 
+> 因为某些虚拟机软件的续费实在太贵，索性自己手搓了一个。这个项目最初只是想验证一下：自己做一个满足轻办公需求的 Windows 虚拟机，到底行不行。目前版本尚可用，但还有大把的优化空间。欢迎把整个项目喂给你的 AI Agent，继续开发、优化，折腾出更适合自己的版本。
+>
+> Some virtual machine apps cost too much to renew, so I decided to build my own. This project started as a feasibility experiment: could I make a Windows VM app that covers everyday office tasks? The current version is usable, with plenty of room for improvement. Feel free to hand the whole project to your AI agent and keep developing, refining, and making it your own.
+
 **在 Mac 上，轻松处理 Windows 轻办公。**<br>
 **Windows for everyday work on your Mac.**
 
