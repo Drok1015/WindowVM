@@ -116,7 +116,26 @@ static void ResizeWindow(NSView *view, SEL selector) {
 // Closing the native Engine window asks the manager to save; it never invokes
 // QEMU's original destructive UI termination path. QMP quit remains available.
 static BOOL suspendRequested;
-static void RequestSuspend(void) {
+NSPanel *WVMCreateSuspendPanel(void) {
+  NSPanel *panel = [[NSPanel alloc] initWithContentRect:NSMakeRect(0, 0, 480, 146)
+    styleMask:NSWindowStyleMaskTitled backing:NSBackingStoreBuffered defer:NO];
+  panel.title = @"保存并暂停 Windows";
+  NSProgressIndicator *spinner = [[NSProgressIndicator alloc] initWithFrame:NSMakeRect(24, 85, 24, 24)];
+  spinner.style = NSProgressIndicatorStyleSpinning;
+  [spinner startAnimation:nil];
+  [panel.contentView addSubview:spinner];
+  NSTextField *heading = [NSTextField labelWithString:@"正在保存 Windows 内存与设备状态…"];
+  heading.frame = NSMakeRect(62, 88, 394, 24);
+  heading.font = [NSFont boldSystemFontOfSize:14];
+  [panel.contentView addSubview:heading];
+  NSTextField *detail = [NSTextField wrappingLabelWithString:@"正在连接管理应用…\n保存完成后窗口会自动关闭，请勿强制退出。"];
+  detail.frame = NSMakeRect(24, 20, 432, 54);
+  detail.tag = 100;
+  [panel.contentView addSubview:detail];
+  return panel;
+}
+
+static void RequestSuspend(NSWindow *requestedWindow) {
   if (suspendRequested || !StateDirectory()) return;
   NSString *identifier = NSUUID.UUID.UUIDString;
   NSDictionary *request = @{@"id": identifier, @"pid": @(getpid()), @"action": @"suspend"};
@@ -130,8 +149,13 @@ static void RequestSuspend(void) {
   }
   [[NSFileManager defaultManager] setAttributes:@{NSFilePosixPermissions:@0600} ofItemAtPath:path error:nil];
   suspendRequested = YES;
-  NSWindow *window = NSApp.mainWindow;
+  NSWindow *window = requestedWindow ?: NSApp.mainWindow ?: NSApp.keyWindow;
   NSString *title = window.title;
+  NSPanel *progress = nil;
+  if (window.visible) {
+    progress = WVMCreateSuspendPanel();
+    [window beginSheet:progress completionHandler:nil];
+  }
   window.title = @"WindowVM · 正在保存运行状态…";
   NSDate *started = NSDate.date;
   __block BOOL accepted = NO;
@@ -141,8 +165,17 @@ static void RequestSuspend(void) {
     BOOL matches = [response[@"id"] isEqual:identifier];
     if (matches && [response[@"status"] isEqual:@"saving"]) accepted = YES;
     BOOL failed = matches && [response[@"status"] isEqual:@"error"];
+    NSInteger elapsed = (NSInteger)-started.timeIntervalSinceNow;
+    NSDictionary *attributes = [NSFileManager.defaultManager attributesOfItemAtPath:
+      [StateDirectory() stringByAppendingPathComponent:@"suspend.bin"] error:nil];
+    double gib = [attributes[NSFileSize] doubleValue] / (1024.0 * 1024 * 1024);
+    NSString *state = accepted ? [NSString stringWithFormat:@"已写入 %.1f GB · 已用时 %ld 秒", gib, (long)elapsed] : @"正在连接管理应用…";
+    NSTextField *detail = [progress.contentView viewWithTag:100];
+    detail.stringValue = [state stringByAppendingString:@"\n保存完成后窗口会自动关闭，请勿强制退出。"];
+    window.title = [NSString stringWithFormat:@"WindowVM · 正在保存 · %ld 秒", (long)elapsed];
     if (failed || (!accepted && -started.timeIntervalSinceNow > 8)) {
       [timer invalidate]; suspendRequested = NO; window.title = title;
+      if (progress) { [window endSheet:progress]; [progress orderOut:nil]; }
       NSAlert *alert = [NSAlert new]; alert.messageText = @"Windows 尚未暂停";
       alert.informativeText = failed ? response[@"error"] : @"WindowVM 管理应用没有响应。窗口已保留，请打开管理应用后重试；不要强制退出 Engine。";
       [alert runModal];
@@ -150,8 +183,12 @@ static void RequestSuspend(void) {
   }];
   [NSRunLoop.mainRunLoop addTimer:timer forMode:NSRunLoopCommonModes];
 }
-static BOOL SuspendOnClose(id self, SEL selector, id sender) { RequestSuspend(); return NO; }
-static NSApplicationTerminateReply SuspendOnQuit(id self, SEL selector, id sender) { RequestSuspend(); return NSTerminateCancel; }
+static BOOL SuspendOnClose(id self, SEL selector, id sender) {
+  RequestSuspend([sender isKindOfClass:NSWindow.class] ? sender : nil); return NO;
+}
+static NSApplicationTerminateReply SuspendOnQuit(id self, SEL selector, id sender) {
+  RequestSuspend(nil); return NSTerminateCancel;
+}
 
 BOOL WVMInstallLifecycleHooks(void) {
   Class controller = NSClassFromString(@"QemuCocoaAppController");

@@ -1,0 +1,31 @@
+WindowVM close / save feedback verification — 2026-11-11
+
+Trigger: close the manager window first, then close the Windows Engine window.
+The prior build did save a complete checkpoint, but saving several GiB left
+an apparently frozen desktop and the manager could not reliably reopen its UI.
+
+Changes:
+- Manager Close hides the existing window and keeps lifecycle controls alive.
+- Dock/Finder reopen shows the same window again, preserving SwiftUI callbacks
+  through a forwarding window delegate.
+- Engine Close displays a non-dismissible save sheet, an animated spinner,
+  written GiB and elapsed seconds; the window exits only after save completes.
+- The close callback supplies the actual window even when mainWindow is nil.
+
+Checks:
+- 10 Swift tests passed, including hide/reopen and original delegate forwarding.
+- Native AppKit display/lifecycle tests passed, including save-sheet content.
+- Release build and deep/strict code signature verification passed.
+- Updated app installed at /Applications/WindowVM.app after a complete pause;
+  bundled QEMU hash remained identical, and the existing checkpoint resumed.
+- Live sequence: close manager -> reopen the same window -> close manager ->
+  close Engine. The manager remained alive without a visible window. A save
+  sheet displayed written size and elapsed time; checkpoint completed and
+  the Engine exited automatically in approximately 45 seconds.
+- Reopened WindowVM: the same manager window appeared, the checkpoint resumed
+  and consumed-state files were cleaned. Windows desktop and guest display
+  acknowledgement were present. Diagnostic copies and original VM state were
+  preserved; no fresh UEFI reset was performed for this close/resume fix.
+
+This verifies the reported window-close sequence; it does not establish that
+all future Windows/QEMU suspend or boot failures are eliminated.

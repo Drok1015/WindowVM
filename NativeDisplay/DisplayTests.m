@@ -2,6 +2,7 @@
 #import <QuartzCore/QuartzCore.h>
 extern BOOL WVMInstallDisplayHooks(void);
 extern BOOL WVMInstallLifecycleHooks(void);
+extern NSPanel *WVMCreateSuspendPanel(void);
 @interface QemuCocoaAppController : NSObject
 - (BOOL)windowShouldClose:(id)sender;
 - (NSApplicationTerminateReply)applicationShouldTerminate:(id)sender;
@@ -76,6 +77,11 @@ int main(void) { @autoreleasepool {
   [NSData.data writeToFile:[root stringByAppendingPathComponent:@"display-configured"] atomically:YES];
   Run(.6); Check(controller.selections==1 && controller.selected==1);
   Run(.6); Check(controller.selections==1);
+  NSPanel *progress = WVMCreateSuspendPanel();
+  Check([progress.title isEqual:@"保存并暂停 Windows"]);
+  NSTextField *detail = [progress.contentView viewWithTag:100];
+  Check([detail.stringValue containsString:@"保存完成后窗口会自动关闭"]);
+  Check(!(progress.styleMask & NSWindowStyleMaskClosable));
   Check(WVMInstallLifecycleHooks());
   QemuCocoaAppController *lifecycle = [QemuCocoaAppController new];
   Check(![lifecycle windowShouldClose:window]);
@@ -85,5 +91,5 @@ int main(void) { @autoreleasepool {
   Check([lifecycle applicationShouldTerminate:NSApp] == NSTerminateCancel);
   Check([[NSData dataWithContentsOfFile:[root stringByAppendingPathComponent:@"lifecycle-request.json"]] isEqual:requestData]);
   [[NSFileManager defaultManager] removeItemAtPath:root error:nil];
-  printf("PASS: 800ms leading/trailing throttle during event tracking, latest-size coalescing, independent aspect, no feedback/duplicates, safe bounds, Retina backing pixels and screen changes, GPU console activation, safe close/quit interception and duplicate suppression\n");
+  printf("PASS: 800ms leading/trailing throttle during event tracking, latest-size coalescing, independent aspect, no feedback/duplicates, safe bounds, Retina backing pixels and screen changes, GPU console activation, safe close/quit interception, duplicate suppression and non-dismissible save feedback\n");
 } return 0; }

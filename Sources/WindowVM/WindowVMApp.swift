@@ -2,7 +2,17 @@ import SwiftUI
 import AppKit
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
-  weak var controller: VMController?
+  var controller: VMController?
+  private weak var managementWindow: NSWindow?
+  private let managementDelegate = ManagementWindowDelegate()
+  func attachManagementWindow(_ window: NSWindow) {
+    managementWindow = window
+    if window.delegate !== managementDelegate {
+      managementDelegate.original = window.delegate
+      window.delegate = managementDelegate
+    }
+  }
+  func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { false }
   func applicationDidFinishLaunching(_ notification: Notification) {
     if let url = Bundle.main.url(forResource: "AppIcon", withExtension: "icns"),
        let icon = NSImage(contentsOf: url) {
@@ -12,6 +22,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     NSApp.activate(ignoringOtherApps: true)
   }
   func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+    managementWindow?.makeKeyAndOrderFront(nil)
+    NSApp.activate(ignoringOtherApps: true)
     if controller?.suspended == true { controller?.start() }
     return true
   }
@@ -31,6 +43,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
   var body: some Scene {
     WindowGroup("WindowVM") {
       MainView(controller: controller)
+        .background(ManagementWindowReader { delegate.attachManagementWindow($0) })
         .onAppear {
           delegate.controller = controller
           if controller.suspended { controller.start() }
@@ -148,4 +161,36 @@ struct ClipboardStatus: View {
     Text("剪贴板：\(bridge.status)")
     Text("显示：\(bridge.displayStatus)")
   }.font(.caption).foregroundStyle(.secondary) }
+}
+
+/// Keep the existing SwiftUI window available for Dock/Finder reopen actions.
+private struct ManagementWindowReader: NSViewRepresentable {
+  var attach: (NSWindow) -> Void
+  func makeNSView(context: Context) -> WindowProbe { WindowProbe(attach: attach) }
+  func updateNSView(_ view: WindowProbe, context: Context) { view.attach = attach }
+  final class WindowProbe: NSView {
+    var attach: (NSWindow) -> Void
+    init(attach: @escaping (NSWindow) -> Void) { self.attach = attach; super.init(frame: .zero) }
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+    override func viewDidMoveToWindow() {
+      super.viewDidMoveToWindow()
+      if let window { attach(window) }
+    }
+  }
+}
+
+/// Preserve SwiftUI's other window callbacks while turning Close into Hide.
+final class ManagementWindowDelegate: NSObject, NSWindowDelegate {
+  var original: NSWindowDelegate?
+  func windowShouldClose(_ sender: NSWindow) -> Bool {
+    sender.orderOut(nil)
+    return false
+  }
+  override func responds(to selector: Selector!) -> Bool {
+    super.responds(to: selector) || original?.responds(to: selector) == true
+  }
+  override func forwardingTarget(for selector: Selector!) -> Any? {
+    if original?.responds(to: selector) == true { return original }
+    return super.forwardingTarget(for: selector)
+  }
 }

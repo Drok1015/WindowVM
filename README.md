@@ -27,7 +27,7 @@ WindowVM 是为 Apple 芯片 Mac 打造的开源 Windows 11 ARM 虚拟机应用�
 - **原生管理界面**：配置 CPU、内存、稀疏磁盘与安装镜像，默认 4 核 / 8 GB / 80 GB。
 - **清晰的 Windows 窗口**：支持 Retina 和窗口大小自适应，需安装随附显示驱动与配套程序。
 - **双向文字剪贴板**：Mac 与 Windows 之间复制中文、英文和 emoji；暂不支持文件或图片剪贴板。
-- **保存并继续**：关闭 Engine 窗口会保存内存与设备状态，下次打开继续操作；不是多版本快照。
+- **保存并继续**：关闭管理窗口会隐藏界面并保持后台运行；关闭 Engine 窗口会显示保存大小和耗时，保存内存与设备状态后退出，下次打开继续操作。较大状态可能需要数十秒至数分钟；不是多版本快照。
 - **网络互通**：NAT 上网、访问 Mac 服务、仅绑定本机的 TCP 端口转发。
 - **宿主代理助手**：按需将 Mac HTTP/HTTPS 系统代理应用到 Windows 当前用户，并支持恢复原设置。
 - **独立数据目录**：虚拟机文件保存在 `~/Library/Application Support/WindowVM/Windows11`。
@@ -76,7 +76,7 @@ python3 scripts/smoke.py
 python3 scripts/smoke-suspend.py
 ```
 
-显示适配目前针对 QEMU 11.1.3，升级 QEMU 后需重新验证。9 项 Swift 测试及原生显示适配测试已通过；真实 Windows 的网络、双向剪贴板、分辨率适配和暂停恢复记录见 [开发说明](docs/DEVELOPMENT.zh-CN.md) 与 `docs/verification-*.txt`。
+显示适配目前针对 QEMU 11.1.3，升级 QEMU 后需重新验证。10 项 Swift 测试及原生显示适配测试已通过；真实 Windows 的网络、双向剪贴板、分辨率适配和暂停恢复记录见 [开发说明](docs/DEVELOPMENT.zh-CN.md) 与 `docs/verification-*.txt`。
 
 ## English
 
@@ -89,7 +89,7 @@ This is an early preview for users comfortable installing Windows and its runtim
 - **Native controls** for CPU, memory, installation media, and a sparse disk; defaults to 4 cores / 8 GB RAM / 80 GB storage.
 - **Retina-aware display resizing** after installing the included display driver and guest helper.
 - **Bidirectional text clipboard**, including Chinese and emoji. File and image clipboard transfer is not supported.
-- **Save and resume** when closing the Engine window. One pending saved state, rather than a history of snapshots.
+- **Save and resume** when closing the Engine window, with visible saved size and elapsed time. Closing the manager hides its UI while keeping VM controls running in the background. Large states can take tens of seconds to several minutes. One pending saved state, rather than a history of snapshots.
 - **NAT networking**, access to Mac services, and a TCP forwarding rule bound to localhost.
 - **Host proxy helper** to apply Mac HTTP/HTTPS proxy settings to the current Windows user and restore previous settings.
 - **Separate VM storage** at `~/Library/Application Support/WindowVM/Windows11`.
@@ -131,7 +131,7 @@ cd WindowVM
 open build/WindowVM.app
 ```
 
-Run `swift test` and `./scripts/test-display.sh` for unit/native checks. After building, `python3 scripts/smoke.py` and `python3 scripts/smoke-suspend.py` exercise hardware virtualization in temporary VMs. Display integration currently targets QEMU 11.1.3 and must be revalidated after upgrades. Nine Swift tests and the native display checks pass; Windows integration evidence is in `docs/verification-*.txt`.
+Run `swift test` and `./scripts/test-display.sh` for unit/native checks. After building, `python3 scripts/smoke.py` and `python3 scripts/smoke-suspend.py` exercise hardware virtualization in temporary VMs. Display integration currently targets QEMU 11.1.3 and must be revalidated after upgrades. Ten Swift tests and the native display checks pass; Windows integration evidence is in `docs/verification-*.txt`.
 
 ## Source layout / 代码结构
 
